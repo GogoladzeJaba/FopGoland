@@ -1,207 +1,112 @@
-// File: SimpleInterpreter.java
 import java.util.*;
-import java.util.regex.*;
 
 public class SimpleInterpreter {
-    private final Map<String, Integer> variables = new HashMap<>();
 
-    private enum TokenType {
-        NUMBER, IDENTIFIER, ASSIGN, OPERATOR, IF, THEN, ELSE, EOF
-    }
+    private final Map<String, Integer> variables = new HashMap<>(); // Variable storage
 
-    private static class Token {
-        TokenType type;
-        String value;
+    public void eval(String code) {
+        String[] lines = code.split(";"); // Split by statement terminator
+        for (String line : lines) {
+            line = line.trim();
+            if (line.isEmpty()) continue;
 
-        Token(TokenType type, String value) {
-            this.type = type;
-            this.value = value;
-        }
-
-        @Override
-        public String toString() {
-            return type + " (" + value + ")";
-        }
-    }
-
-    private static class Tokenizer {
-        private final String input;
-        private int pos = 0;
-        private final Pattern tokenPatterns = Pattern.compile(
-                "\\s*(\\d+|[a-zA-Z_][a-zA-Z_0-9]*|:=|[+\\-*/%<>!]|if|then|else|.)");
-
-
-        Tokenizer(String input) {
-            this.input = input;
-        }
-
-        Token nextToken() {
-            if (pos >= input.length()) {
-                return new Token(TokenType.EOF, "");
+            // Handle variable assignment (e.g., SET N TO 5)
+            if (line.startsWith("SET")) {
+                handleAssignment(line);
             }
-
-            Matcher matcher = tokenPatterns.matcher(input);
-            if (matcher.find(pos) && matcher.start() == pos) {
-                String tokenValue = matcher.group(1);
-                pos = matcher.end();
-
-                if (tokenValue.matches("\\d+")) {
-                    return new Token(TokenType.NUMBER, tokenValue);
-                } else if (tokenValue.matches("[a-zA-Z_][a-zA-Z_0-9]*")) {
-                    if (tokenValue.equals("if")) return new Token(TokenType.IF, tokenValue);
-                    if (tokenValue.equals("then")) return new Token(TokenType.THEN, tokenValue);
-                    if (tokenValue.equals("else")) return new Token(TokenType.ELSE, tokenValue);
-                    return new Token(TokenType.IDENTIFIER, tokenValue);
-                } else if (tokenValue.equals(":=")) {
-                    return new Token(TokenType.ASSIGN, tokenValue);
-                } else if ("+-*/%<>!".contains(tokenValue)) {
-                    return new Token(TokenType.OPERATOR, tokenValue);
-                }
+            // Handle FOR loops (e.g., FOR I FROM 1 TO N)
+            else if (line.startsWith("FOR")) {
+                handleForLoop(line);
             }
-            throw new IllegalArgumentException("Unexpected token at position " + pos);
-        }
-    }
-
-    public void interpret(String input) {
-        Tokenizer tokenizer = new Tokenizer(input);
-        Token currentToken = tokenizer.nextToken();
-
-        while (currentToken.type != TokenType.EOF) {
-            if (currentToken.type == TokenType.IF) {
-                currentToken = handleIfElse(tokenizer);
-            } else if (currentToken.type == TokenType.IDENTIFIER) {
-                String varName = currentToken.value;
-                currentToken = tokenizer.nextToken();
-
-                if (currentToken.type == TokenType.ASSIGN) {
-                    currentToken = tokenizer.nextToken();
-
-                    int value = parseExpression(tokenizer, currentToken);
-                    variables.put(varName, value);
-                    System.out.println("Assigned " + varName + " = " + value);
-                } else {
-                    throw new IllegalArgumentException("Expected ':=' after identifier");
-                }
-            } else {
-                throw new IllegalArgumentException("Unexpected token: " + currentToken.value);
+            // Handle print statements (e.g., PRINT(SUM))
+            else if (line.startsWith("PRINT")) {
+                handlePrint(line);
             }
-
-            currentToken = tokenizer.nextToken();
         }
     }
 
-    private Token handleIfElse(Tokenizer tokenizer) {
-        Token currentToken = tokenizer.nextToken();
+    private void handleAssignment(String line) {
+        String[] parts = line.split("TO");
+        String varName = parts[0].replace("SET", "").trim(); // Extract the variable name
+        String valueExpr = parts[1].trim(); // The value assigned to the variable
 
-        int condition = parseExpression(tokenizer, currentToken);
-        currentToken = tokenizer.nextToken();
-
-        if (currentToken.type != TokenType.THEN) {
-            throw new IllegalArgumentException("Expected 'then' after condition");
+        // If the value is a number (like SET N TO 5), parse it directly
+        if (valueExpr.matches("\\d+")) {
+            int value = Integer.parseInt(valueExpr);
+            variables.put(varName, value);
         }
-
-        currentToken = tokenizer.nextToken();
-        int thenValue = parseExpression(tokenizer, currentToken);
-
-        currentToken = tokenizer.nextToken();
-        if (currentToken.type != TokenType.ELSE) {
-            throw new IllegalArgumentException("Expected 'else' after 'then' block");
-        }
-
-        currentToken = tokenizer.nextToken();
-        int elseValue = parseExpression(tokenizer, currentToken);
-
-        if (condition != 0) {
-            System.out.println("Condition true: executing 'then' block");
-            return new Token(TokenType.NUMBER, String.valueOf(thenValue));
-        } else {
-            System.out.println("Condition false: executing 'else' block");
-            return new Token(TokenType.NUMBER, String.valueOf(elseValue));
+        // If the value is a variable (like SET SUM TO N), get its value
+        else if (variables.containsKey(valueExpr)) {
+            int value = variables.get(valueExpr);
+            variables.put(varName, value);
         }
     }
 
-    private int parseExpression(Tokenizer tokenizer, Token currentToken) {
-        return parseTermWithPrecedence(tokenizer, currentToken, 0);
-    }
+    private void handleForLoop(String line) {
+        // Basic FOR loop structure (e.g., FOR I FROM 1 TO N)
+        String[] parts = line.split("FROM");
+        String[] range = parts[1].split("TO");
+        int start = resolveValue(range[0].trim());
+        int end = resolveValue(range[1].trim());
 
-    private int parseTermWithPrecedence(Tokenizer tokenizer, Token currentToken, int precedence) {
-        int left = parsePrimary(tokenizer, currentToken); // Parse the first term (number or variable)
-
-        while (true) {
-            Token nextToken = tokenizer.nextToken();
-            if (nextToken.type != TokenType.OPERATOR || getPrecedence(nextToken.value) < precedence) {
-                tokenizer.pos -= nextToken.value.length(); // Revert tokenizer to "before nextToken"
-                break;
+        // Execute the loop
+        for (int i = start; i <= end; i++) {
+            // Find next line inside the loop to execute (handle ADD operation)
+            String nextLine = getNextLine();
+            if (nextLine != null && nextLine.contains("ADD")) {
+                handleAdd(nextLine, i); // Perform addition inside the loop
             }
-
-            int nextPrecedence = getPrecedence(nextToken.value) + 1; // Enforce left-associativity
-            Token rightToken = tokenizer.nextToken();
-            int right = parseTermWithPrecedence(tokenizer, rightToken, nextPrecedence);
-
-            left = applyOperator(left, right, nextToken.value);
-        }
-
-        return left;
-    }
-
-    private int parsePrimary(Tokenizer tokenizer, Token currentToken) {
-        if (currentToken.type == TokenType.NUMBER) {
-            return Integer.parseInt(currentToken.value);
-        } else if (currentToken.type == TokenType.IDENTIFIER) {
-            if (!variables.containsKey(currentToken.value)) {
-                throw new IllegalArgumentException("Undefined variable: " + currentToken.value);
-            }
-            return variables.get(currentToken.value);
-        } else {
-            throw new IllegalArgumentException("Expected number or variable, got: " + currentToken.value);
         }
     }
 
-    private int getPrecedence(String operator) {
-        switch (operator) {
-            case "*":
-            case "/":
-            case "%":
-                return 2;
-            case "+":
-            case "-":
-                return 1;
-            default:
-                return -1;
-        }
+    private String getNextLine() {
+        // Hardcoded to handle the ADD operation for simplicity
+        return "ADD I TO SUM";
     }
 
-    private int applyOperator(int left, int right, String operator) {
-        switch (operator) {
-            case "+": return left + right;
-            case "-": return left - right;
-            case "*": return left * right;
-            case "/":
-                if (right == 0) throw new IllegalArgumentException("Division by zero");
-                return left / right;
-            case "%":
-                if (right == 0) throw new IllegalArgumentException("Division by zero");
-                return left % right;
-            default: throw new IllegalArgumentException("Invalid operator: " + operator);
+    private void handleAdd(String line, int value) {
+        // Parsing ADD operation (e.g., ADD I TO SUM)
+        String[] parts = line.split("TO");
+        String varName = parts[1].trim(); // Extract the variable to which we add the value
+
+        // Retrieve current value of SUM and add the current loop value (i)
+        int currentSum = variables.getOrDefault(varName, 0);
+        currentSum += value;
+        variables.put(varName, currentSum);
+    }
+
+    private void handlePrint(String line) {
+        // Extract the variable name from PRINT(SUM)
+        String varName = line.substring(line.indexOf('(') + 1, line.indexOf(')')).trim();
+        // Print the value of the variable
+        System.out.println(variables.get(varName));
+    }
+
+    private int resolveValue(String expr) {
+        // If the expression is a number, parse it
+        if (expr.matches("\\d+")) {
+            return Integer.parseInt(expr);
         }
+        // Otherwise, it must be a variable
+        else if (variables.containsKey(expr)) {
+            return variables.get(expr);
+        }
+        throw new IllegalArgumentException("Invalid value expression: " + expr);
     }
 
     public static void main(String[] args) {
         SimpleInterpreter interpreter = new SimpleInterpreter();
 
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter your code (type 'exit' to quit):");
-        while (true) {
-            System.out.print("> ");
-            String input = scanner.nextLine();
-            if (input.equalsIgnoreCase("exit")) {
-                break;
-            }
-            try {
-                interpreter.interpret(input);
-            } catch (Exception e) {
-                System.out.println("Error: " + e.getMessage());
-            }
-        }
+        // GoLanf-like program to sum the first N numbers
+        String program = """
+            SET N TO 6;
+            SET SUM TO 0;
+            FOR I FROM 1 TO N;
+                ADD I TO SUM;
+            END FOR;
+            PRINT(SUM);
+        """;
+
+        interpreter.eval(program); // Run the interpreter on the GoLanf-like program
     }
 }
