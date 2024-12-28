@@ -6,7 +6,7 @@ public class SimpleInterpreter {
     private final Map<String, Integer> variables = new HashMap<>();
 
     private enum TokenType {
-        NUMBER, IDENTIFIER, ASSIGN, OPERATOR, EOF
+        NUMBER, IDENTIFIER, ASSIGN, OPERATOR, IF, THEN, ELSE, EOF
     }
 
     private static class Token {
@@ -28,7 +28,8 @@ public class SimpleInterpreter {
         private final String input;
         private int pos = 0;
         private final Pattern tokenPatterns = Pattern.compile(
-                "\\s*(\\d+|[a-zA-Z_][a-zA-Z_0-9]*|:=|[+\\-*/%]|.)");
+                "\\s*(\\d+|[a-zA-Z_][a-zA-Z_0-9]*|:=|[+\\-*/%<>!]|if|then|else|.)");
+
 
         Tokenizer(String input) {
             this.input = input;
@@ -47,10 +48,13 @@ public class SimpleInterpreter {
                 if (tokenValue.matches("\\d+")) {
                     return new Token(TokenType.NUMBER, tokenValue);
                 } else if (tokenValue.matches("[a-zA-Z_][a-zA-Z_0-9]*")) {
+                    if (tokenValue.equals("if")) return new Token(TokenType.IF, tokenValue);
+                    if (tokenValue.equals("then")) return new Token(TokenType.THEN, tokenValue);
+                    if (tokenValue.equals("else")) return new Token(TokenType.ELSE, tokenValue);
                     return new Token(TokenType.IDENTIFIER, tokenValue);
                 } else if (tokenValue.equals(":=")) {
                     return new Token(TokenType.ASSIGN, tokenValue);
-                } else if ("+-*/%".contains(tokenValue)) {
+                } else if ("+-*/%<>!".contains(tokenValue)) {
                     return new Token(TokenType.OPERATOR, tokenValue);
                 }
             }
@@ -63,7 +67,9 @@ public class SimpleInterpreter {
         Token currentToken = tokenizer.nextToken();
 
         while (currentToken.type != TokenType.EOF) {
-            if (currentToken.type == TokenType.IDENTIFIER) {
+            if (currentToken.type == TokenType.IF) {
+                currentToken = handleIfElse(tokenizer);
+            } else if (currentToken.type == TokenType.IDENTIFIER) {
                 String varName = currentToken.value;
                 currentToken = tokenizer.nextToken();
 
@@ -84,6 +90,36 @@ public class SimpleInterpreter {
         }
     }
 
+    private Token handleIfElse(Tokenizer tokenizer) {
+        Token currentToken = tokenizer.nextToken();
+
+        int condition = parseExpression(tokenizer, currentToken);
+        currentToken = tokenizer.nextToken();
+
+        if (currentToken.type != TokenType.THEN) {
+            throw new IllegalArgumentException("Expected 'then' after condition");
+        }
+
+        currentToken = tokenizer.nextToken();
+        int thenValue = parseExpression(tokenizer, currentToken);
+
+        currentToken = tokenizer.nextToken();
+        if (currentToken.type != TokenType.ELSE) {
+            throw new IllegalArgumentException("Expected 'else' after 'then' block");
+        }
+
+        currentToken = tokenizer.nextToken();
+        int elseValue = parseExpression(tokenizer, currentToken);
+
+        if (condition != 0) {
+            System.out.println("Condition true: executing 'then' block");
+            return new Token(TokenType.NUMBER, String.valueOf(thenValue));
+        } else {
+            System.out.println("Condition false: executing 'else' block");
+            return new Token(TokenType.NUMBER, String.valueOf(elseValue));
+        }
+    }
+
     private int parseExpression(Tokenizer tokenizer, Token currentToken) {
         return parseTermWithPrecedence(tokenizer, currentToken, 0);
     }
@@ -92,20 +128,16 @@ public class SimpleInterpreter {
         int left = parsePrimary(tokenizer, currentToken); // Parse the first term (number or variable)
 
         while (true) {
-            // Peek the next token without consuming it
             Token nextToken = tokenizer.nextToken();
             if (nextToken.type != TokenType.OPERATOR || getPrecedence(nextToken.value) < precedence) {
-                // If no valid operator or lower precedence, exit loop
                 tokenizer.pos -= nextToken.value.length(); // Revert tokenizer to "before nextToken"
                 break;
             }
 
-            // Advance to the next token and handle higher precedence terms
             int nextPrecedence = getPrecedence(nextToken.value) + 1; // Enforce left-associativity
-            Token rightToken = tokenizer.nextToken(); // Get the token after the operator
+            Token rightToken = tokenizer.nextToken();
             int right = parseTermWithPrecedence(tokenizer, rightToken, nextPrecedence);
 
-            // Apply operator to current result
             left = applyOperator(left, right, nextToken.value);
         }
 
