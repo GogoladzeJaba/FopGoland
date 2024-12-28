@@ -111,7 +111,7 @@ public class SumOfFirstNthNumber {
             PRINT(SUM);
         """;
 
-            interpreter.eval(program); // Run the interpreter on the GoLanf-like program
+            interpreter.eval(program); // Run the interpreter on the GoLand-like program
         }
     }
 
