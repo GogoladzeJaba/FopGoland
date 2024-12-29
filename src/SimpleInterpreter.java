@@ -7,7 +7,6 @@ public class SimpleInterpreter {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            System.out.println("/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\");
             System.out.println("\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/");
             System.out.println("Welcome to the Simple Interpreter! Choose an algorithm:");
             System.out.println("1. Sum of First N Numbers");

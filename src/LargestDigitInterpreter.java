@@ -3,6 +3,7 @@ import java.util.*;
 public class LargestDigitInterpreter {
 
     private final Map<String, Integer> variables = new HashMap<>(); // Variable storage
+    private final Scanner scanner = new Scanner(System.in); // To get user input
 
     public void eval(String code) {
         String[] lines = code.split(";"); // Split by statement terminator
@@ -14,8 +15,8 @@ public class LargestDigitInterpreter {
             if (line.startsWith("SET")) {
                 handleAssignment(line);
             }
-            // Handle largest digit operation (e.g., LARGESTDIGIT N INTO RESULT)
-            else if (line.startsWith("LARGESTDIGIT")) {
+            // Handle largest digit operation (e.g., RESULT := LARGESTDIGIT(N))
+            else if (line.contains(":= LARGESTDIGIT")) {
                 handleLargestDigit(line);
             }
             // Handle print statements (e.g., PRINT(RESULT))
@@ -26,16 +27,16 @@ public class LargestDigitInterpreter {
     }
 
     private void handleAssignment(String line) {
-        String[] parts = line.split("TO");
+        String[] parts = line.split(":=");
         String varName = parts[0].replace("SET", "").trim(); // Extract the variable name
         String valueExpr = parts[1].trim(); // The value assigned to the variable
 
-        // If the value is a number (like SET N TO 121), parse it directly
+        // If the value is a number (like SET N := 121), parse it directly
         if (valueExpr.matches("\\d+")) {
             int value = Integer.parseInt(valueExpr);
             variables.put(varName, value);
         }
-        // If the value is a variable (like SET RESULT TO N), get its value
+        // If the value is a variable (like SET RESULT := N), get its value
         else if (variables.containsKey(valueExpr)) {
             int value = variables.get(valueExpr);
             variables.put(varName, value);
@@ -43,10 +44,12 @@ public class LargestDigitInterpreter {
     }
 
     private void handleLargestDigit(String line) {
-        // Parse LARGESTDIGIT operation (e.g., LARGESTDIGIT N INTO RESULT)
-        String[] parts = line.split("INTO");
-        String varName = parts[0].replace("LARGESTDIGIT", "").trim();
-        String resultVar = parts[1].trim();
+        // Parse LARGESTDIGIT operation (e.g., RESULT := LARGESTDIGIT(N))
+        String[] parts = line.split(":=");
+        String resultVar = parts[0].trim(); // Extract the result variable
+        String functionCall = parts[1].trim(); // Extract the LARGESTDIGIT(N) function
+
+        String varName = functionCall.substring(functionCall.indexOf('(') + 1, functionCall.indexOf(')')).trim();
 
         int value = resolveValue(varName);
         int largestDigit = findLargestDigit(value);
@@ -95,13 +98,17 @@ public class LargestDigitInterpreter {
     public static void main(String[] args) {
         LargestDigitInterpreter interpreter = new LargestDigitInterpreter();
 
-        // GoLand-like program to find the largest digit in a number
-        String program = """
-            SET N TO 412950399;
-            LARGESTDIGIT N INTO RESULT;
-            PRINT(RESULT);
-        """;
+        // Ask for user input for N
+        System.out.print("Input value of N: ");
+        int n = interpreter.scanner.nextInt(); // Get value of N from user
 
-        interpreter.eval(program); // Run the interpreter on the GoLand-like program
+        // Updated program string with aligned syntax
+        String program = String.format("""
+            SET N := %d;
+            RESULT := LARGESTDIGIT(N);
+            PRINT(RESULT);
+        """, n);
+
+        interpreter.eval(program); // Run the interpreter on the program
     }
 }
