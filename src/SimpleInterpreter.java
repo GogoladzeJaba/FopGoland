@@ -1,10 +1,14 @@
 import java.util.Scanner;
 
+import static java.lang.Thread.sleep;
+
 public class SimpleInterpreter {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
+            System.out.println("/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\");
+            System.out.println("\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/");
             System.out.println("Welcome to the Simple Interpreter! Choose an algorithm:");
             System.out.println("1. Sum of First N Numbers");
             System.out.println("2. Factorial of N");
@@ -39,7 +43,6 @@ public class SimpleInterpreter {
                 default -> System.out.println("Invalid choice. Please try again.");
             }
 
-            System.out.println() ;
         }
     }
 }
