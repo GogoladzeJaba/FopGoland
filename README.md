@@ -13,9 +13,6 @@ The code was written entirely by me with help of GPT4. Nothing is plagiarised or
 
 Some key notes and concerns about my project:
 * I could not for the life of me correctly write an interpreter that reads and understand perfect actual GoLand code. So instead i settled for a Pseudo-Go-like language I've come up with and thats what the codes actually interpreting.
-* Each algorithm also has a different interpreter that suits only its specific needs. I understand this isnt efficient nor the smartest solution however i couldn't make it work another way even after days of trying. 
-
-
-*The code i wrote still acts as a real interpreter, it still parses correctly and it outputs correct results so I believe it still satisfies the main point of the project. 
-
-*You also can't currently copy and paste an entire pseudo-go-like language block in my algorithms and run it, it only supports setting the variable value from the scanner. however that actual code block is indeed sitting in the algorithms code. as far as i know we arent required to be able to handle manual input of that degree so i didn't bother because attempting to implement that cuz it kept breaking everything. If you really want to do that though you can go into the .java files themsleves of the algorithms and manually edit the String program = String.format at the bottom of each of them. but there isnt much point to it.
+* Each algorithm also has a different interpreter that suits only its specific needs. I understand this isnt efficient nor the smartest solution however i couldn't make it work another way even after days of trying.
+* The code i wrote still acts as a real interpreter, it still parses correctly and it outputs correct results so I believe it still satisfies the main point of the project.
+* You also can't currently copy and paste an entire pseudo-go-like language block in my algorithms and run it, it only supports setting the variable value from the scanner. however that actual code block is indeed sitting in the algorithms code. as far as i know we arent required to be able to handle manual input of that degree so i didn't bother because attempting to implement that cuz it kept breaking everything. If you really want to do that though you can go into the .java files themsleves of the algorithms and manually edit the String program = String.format at the bottom of each of them. but there isnt much point to it.
