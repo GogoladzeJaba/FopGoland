@@ -10,11 +10,11 @@ public class SumOfDigitsInterpreter {
             line = line.trim();
             if (line.isEmpty()) continue;
 
-            // Handle variable assignment (e.g., SET N TO 121)
-            if (line.startsWith("SET")) {
+            // Handle variable assignment (e.g., N := 121)
+            if (line.contains(":=")) {
                 handleAssignment(line);
             }
-            // Handle sum of digits operation (e.g., SUMOFDIGITS N INTO RESULT)
+            // Handle sum of digits operation (e.g., SUMOFDIGITS(N) INTO RESULT)
             else if (line.startsWith("SUMOFDIGITS")) {
                 handleSumOfDigits(line);
             }
@@ -26,16 +26,16 @@ public class SumOfDigitsInterpreter {
     }
 
     private void handleAssignment(String line) {
-        String[] parts = line.split("TO");
-        String varName = parts[0].replace("SET", "").trim(); // Extract the variable name
+        String[] parts = line.split(":=");
+        String varName = parts[0].trim(); // Extract the variable name
         String valueExpr = parts[1].trim(); // The value assigned to the variable
 
-        // If the value is a number (like SET N TO 121), parse it directly
+        // If the value is a number (like N := 121), parse it directly
         if (valueExpr.matches("\\d+")) {
             int value = Integer.parseInt(valueExpr);
             variables.put(varName, value);
         }
-        // If the value is a variable (like SET RESULT TO N), get its value
+        // If the value is a variable (like RESULT := N), get its value
         else if (variables.containsKey(valueExpr)) {
             int value = variables.get(valueExpr);
             variables.put(varName, value);
@@ -43,10 +43,12 @@ public class SumOfDigitsInterpreter {
     }
 
     private void handleSumOfDigits(String line) {
-        // Parse SUMOFDIGITS operation (e.g., SUMOFDIGITS N INTO RESULT)
+        // Parse SUMOFDIGITS operation (e.g., SUMOFDIGITS(N) INTO RESULT)
         String[] parts = line.split("INTO");
-        String varName = parts[0].replace("SUMOFDIGITS", "").trim();
+        String functionCall = parts[0].trim();
         String resultVar = parts[1].trim();
+
+        String varName = functionCall.substring(functionCall.indexOf('(') + 1, functionCall.indexOf(')')).trim();
 
         int value = resolveValue(varName);
         int sumOfDigits = findSumOfDigits(value);
@@ -94,8 +96,8 @@ public class SumOfDigitsInterpreter {
 
         // GoLand-like program to find the sum of digits in a number
         String program = """
-            SET N TO 12351;
-            SUMOFDIGITS N INTO RESULT;
+            N := 12351;
+            SUMOFDIGITS(N) INTO RESULT;
             PRINT(RESULT);
         """;
 

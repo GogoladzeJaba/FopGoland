@@ -10,8 +10,8 @@ public class MultiplicationTableInterpreter {
             line = line.trim();
             if (line.isEmpty()) continue;
 
-            // Handle variable assignment (e.g., SET N TO 5)
-            if (line.startsWith("SET")) {
+            // Handle variable assignment (e.g., N := 5)
+            if (line.contains(":=")) {
                 handleAssignment(line);
             }
             // Handle multiplication table operation (e.g., MULTIPLICATIONTABLE N)
@@ -26,16 +26,16 @@ public class MultiplicationTableInterpreter {
     }
 
     private void handleAssignment(String line) {
-        String[] parts = line.split("TO");
-        String varName = parts[0].replace("SET", "").trim(); // Extract the variable name
+        String[] parts = line.split(":=");
+        String varName = parts[0].trim(); // Extract the variable name
         String valueExpr = parts[1].trim(); // The value assigned to the variable
 
-        // If the value is a number (like SET N TO 5), parse it directly
+        // If the value is a number (like N := 5), parse it directly
         if (valueExpr.matches("\\d+")) {
             int value = Integer.parseInt(valueExpr);
             variables.put(varName, value);
         }
-        // If the value is a variable (like SET RESULT TO N), get its value
+        // If the value is a variable (like RESULT := N), get its value
         else if (variables.containsKey(valueExpr)) {
             int value = variables.get(valueExpr);
             variables.put(varName, value);
@@ -80,12 +80,12 @@ public class MultiplicationTableInterpreter {
     public static void main(String[] args) {
         MultiplicationTableInterpreter interpreter = new MultiplicationTableInterpreter();
 
-        // GoLanf-like program to generate a multiplication table
+        // Go-like program to generate a multiplication table
         String program = """
-            SET N TO 8;
+            N :=3;
             MULTIPLICATIONTABLE N;
         """;
 
-        interpreter.eval(program); // Run the interpreter on the GoLanf-like program
+        interpreter.eval(program); // Run the interpreter on the Go-like program
     }
 }

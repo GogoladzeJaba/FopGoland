@@ -10,11 +10,11 @@ public class PrimeNumberInterpreter {
             line = line.trim();
             if (line.isEmpty()) continue;
 
-            // Handle variable assignment (e.g., SET N TO 7)
-            if (line.startsWith("SET")) {
+            // Handle variable assignment (e.g., N := 7)
+            if (line.contains(":=")) {
                 handleAssignment(line);
             }
-            // Handle prime check operation (e.g., ISPRIME N INTO RESULT)
+            // Handle prime check operation (e.g., ISPRIME(N) INTO RESULT)
             else if (line.startsWith("ISPRIME")) {
                 handleIsPrime(line);
             }
@@ -26,28 +26,31 @@ public class PrimeNumberInterpreter {
     }
 
     private void handleAssignment(String line) {
-        String[] parts = line.split("TO");
-        String varName = parts[0].replace("SET", "").trim(); // Extract the variable name
+        String[] parts = line.split(":=");
+        String varName = parts[0].trim(); // Extract the variable name
         String valueExpr = parts[1].trim(); // The value assigned to the variable
 
-        // If the value is a number (like SET N TO 7), parse it directly
+        // If the value is a number (like N := 7), parse it directly
         if (valueExpr.matches("\\d+")) {
             int value = Integer.parseInt(valueExpr);
             variables.put(varName, value);
         }
-        // If the value is a variable (like SET RESULT TO N), get its value
+        // If the value is a variable (like RESULT := N), get its value
         else if (variables.containsKey(valueExpr)) {
             int value = variables.get(valueExpr);
             variables.put(varName, value);
+        } else {
+            throw new IllegalArgumentException("Invalid value expression: " + valueExpr);
         }
     }
 
     private void handleIsPrime(String line) {
-        // Parse ISPRIME operation (e.g., ISPRIME N INTO RESULT)
+        // Parse ISPRIME operation (e.g., ISPRIME(N) INTO RESULT)
         String[] parts = line.split("INTO");
-        String varName = parts[0].replace("ISPRIME", "").trim();
+        String primeExpr = parts[0].replace("ISPRIME", "").trim();
         String resultVar = parts[1].trim();
 
+        String varName = primeExpr.substring(1, primeExpr.length() - 1); // Extract variable inside ISPRIME()
         int value = resolveValue(varName);
         boolean isPrime = checkPrime(value);
 
@@ -89,13 +92,13 @@ public class PrimeNumberInterpreter {
     public static void main(String[] args) {
         PrimeNumberInterpreter interpreter = new PrimeNumberInterpreter();
 
-        // GoLand-like program to check if a number is prime
+        // Go-like program to check if a number is prime
         String program = """
-            SET N TO 37;
-            ISPRIME N INTO RESULT;
+            N := 37;
+            ISPRIME(N) INTO RESULT;
             PRINT(RESULT);
         """;
 
-        interpreter.eval(program); // Run the interpreter on the GoLand-like program
+        interpreter.eval(program); // Run the interpreter on the Go-like program
     }
 }

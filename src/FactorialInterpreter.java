@@ -5,62 +5,74 @@ public class FactorialInterpreter {
     private final Map<String, Integer> variables = new HashMap<>(); // Variable storage
 
     public void eval(String code) {
-        String[] lines = code.split(";"); // Split by statement terminator
-        for (String line : lines) {
-            line = line.trim();
-            if (line.isEmpty()) continue;
+        String[] lines = code.split(";"); // Split the input by statement terminator
+        int currentLineIndex = 0;
 
-            // Handle variable assignment (e.g., SET N TO 5)
-            if (line.startsWith("SET")) {
+        while (currentLineIndex < lines.length) {
+            String line = lines[currentLineIndex].trim();
+            if (line.isEmpty()) {
+                currentLineIndex++;
+                continue;
+            }
+
+            // Handle variable assignment (e.g., N := 5)
+            if (line.contains(":=")) {
                 handleAssignment(line);
             }
             // Handle FOR loops (e.g., FOR I FROM 1 TO N)
             else if (line.startsWith("FOR")) {
-                handleForLoop(line);
+                currentLineIndex = handleForLoop(lines, currentLineIndex);
             }
             // Handle print statements (e.g., PRINT(FACTORIAL))
             else if (line.startsWith("PRINT")) {
                 handlePrint(line);
             }
+
+            currentLineIndex++;
         }
     }
 
     private void handleAssignment(String line) {
-        String[] parts = line.split("TO");
-        String varName = parts[0].replace("SET", "").trim(); // Extract the variable name
-        String valueExpr = parts[1].trim(); // The value assigned to the variable
+        String[] parts = line.split(":=");
+        String varName = parts[0].trim(); // Extract variable name
+        String valueExpr = parts[1].trim(); // Extract assigned value
 
-        // If the value is a number (like SET N TO 5), parse it directly
-        if (valueExpr.matches("\\d+")) {
-            int value = Integer.parseInt(valueExpr);
-            variables.put(varName, value);
-        }
-        // If the value is a variable (like SET FACTORIAL TO N), get its value
-        else if (variables.containsKey(valueExpr)) {
-            int value = variables.get(valueExpr);
-            variables.put(varName, value);
-        }
+        // Evaluate the expression and assign the result
+        int value = evaluateExpression(valueExpr);
+        variables.put(varName, value);
     }
 
-    private void handleForLoop(String line) {
-        // Basic FOR loop structure (e.g., FOR I FROM 1 TO N)
-        String[] parts = line.split("FROM");
-        String[] range = parts[1].split("TO");
-        int start = resolveValue(range[0].trim());
-        int end = resolveValue(range[1].trim());
+    private int handleForLoop(String[] lines, int startLineIndex) {
+        String loopHeader = lines[startLineIndex].trim();
 
-        // Extract the body of the loop
-        for (int i = start; i <= end; i++) {
-            // Multiply I to FACTORIAL
-            int currentFactorial = variables.getOrDefault("FACTORIAL", 1);
-            currentFactorial *= i;
-            variables.put("FACTORIAL", currentFactorial);
+        // Parse the loop header: "FOR I FROM 1 TO N"
+        String[] parts = loopHeader.split("FROM");
+        String loopVar = parts[0].replace("FOR", "").trim();
+        String[] rangeParts = parts[1].split("TO");
+        int start = evaluateExpression(rangeParts[0].trim());
+        int end = evaluateExpression(rangeParts[1].trim());
+
+        // Locate the end of the loop
+        int endLoopIndex = startLineIndex + 1;
+        while (endLoopIndex < lines.length && !lines[endLoopIndex].trim().equals("END FOR")) {
+            endLoopIndex++;
         }
+
+        // Execute the loop body
+        for (int i = start; i <= end; i++) {
+            variables.put(loopVar, i); // Update loop variable
+            for (int j = startLineIndex + 1; j < endLoopIndex; j++) {
+                eval(lines[j].trim() + ";"); // Re-evaluate each line in the loop body
+            }
+        }
+
+        return endLoopIndex; // Skip to the line after "END FOR"
     }
 
     private void handlePrint(String line) {
-        // Extract the variable name from PRINT(FACTORIAL)
+        // Extract variable name from PRINT(variable)
         String varName = line.substring(line.indexOf('(') + 1, line.indexOf(')')).trim();
+
         // Print the value of the variable
         Integer value = variables.get(varName);
         if (value != null) {
@@ -70,14 +82,24 @@ public class FactorialInterpreter {
         }
     }
 
-    private int resolveValue(String expr) {
-        // If the expression is a number, parse it
-        if (expr.matches("\\d+")) {
+    private int evaluateExpression(String expr) {
+        // Evaluate arithmetic expressions (e.g., "FACTORIAL * I")
+        if (expr.matches("\\d+")) { // If it's a number, return it
             return Integer.parseInt(expr);
-        }
-        // Otherwise, it must be a variable
-        else if (variables.containsKey(expr)) {
+        } else if (variables.containsKey(expr)) { // If it's a variable, get its value
             return variables.get(expr);
+        } else if (expr.contains("*")) { // Handle multiplication
+            String[] parts = expr.split("\\*");
+            return evaluateExpression(parts[0].trim()) * evaluateExpression(parts[1].trim());
+        } else if (expr.contains("+")) { // Handle addition
+            String[] parts = expr.split("\\+");
+            return evaluateExpression(parts[0].trim()) + evaluateExpression(parts[1].trim());
+        } else if (expr.contains("-")) { // Handle subtraction
+            String[] parts = expr.split("-");
+            return evaluateExpression(parts[0].trim()) - evaluateExpression(parts[1].trim());
+        } else if (expr.contains("/")) { // Handle division
+            String[] parts = expr.split("/");
+            return evaluateExpression(parts[0].trim()) / evaluateExpression(parts[1].trim());
         }
         throw new IllegalArgumentException("Invalid value expression: " + expr);
     }
@@ -85,16 +107,16 @@ public class FactorialInterpreter {
     public static void main(String[] args) {
         FactorialInterpreter interpreter = new FactorialInterpreter();
 
-        // GoLanf-like program to calculate the factorial of N
+        // Go-like program to calculate the factorial of N
         String program = """
-            SET N TO 6;
-            SET FACTORIAL TO 1;
+            N := 6;
+            FACTORIAL := 1;
             FOR I FROM 1 TO N;
-                MULTIPLY I TO FACTORIAL;
+                FACTORIAL := FACTORIAL * I;
             END FOR;
             PRINT(FACTORIAL);
         """;
 
-        interpreter.eval(program); // Run the interpreter on the GoLanf-like program
+        interpreter.eval(program); // Run the interpreter on the Go-like program
     }
 }

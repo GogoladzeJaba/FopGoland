@@ -10,8 +10,8 @@ public class SumOfFirstNthNumber {
             line = line.trim();
             if (line.isEmpty()) continue;
 
-            // Handle variable assignment (e.g., SET N TO 5)
-            if (line.startsWith("SET")) {
+            // Handle variable assignment (e.g., N := 5)
+            if (line.contains(":=")) {
                 handleAssignment(line);
             }
             // Handle FOR loops (e.g., FOR I FROM 1 TO N)
@@ -26,16 +26,16 @@ public class SumOfFirstNthNumber {
     }
 
     private void handleAssignment(String line) {
-        String[] parts = line.split("TO");
-        String varName = parts[0].replace("SET", "").trim(); // Extract the variable name
+        String[] parts = line.split(":=");
+        String varName = parts[0].trim(); // Extract the variable name
         String valueExpr = parts[1].trim(); // The value assigned to the variable
 
-        // If the value is a number (like SET N TO 5), parse it directly
+        // If the value is a number (like N := 5), parse it directly
         if (valueExpr.matches("\\d+")) {
             int value = Integer.parseInt(valueExpr);
             variables.put(varName, value);
         }
-        // If the value is a variable (like SET SUM TO N), get its value
+        // If the value is a variable (like SUM := N), get its value
         else if (variables.containsKey(valueExpr)) {
             int value = variables.get(valueExpr);
             variables.put(varName, value);
@@ -46,15 +46,15 @@ public class SumOfFirstNthNumber {
         // Basic FOR loop structure (e.g., FOR I FROM 1 TO N)
         String[] parts = line.split("FROM");
         String[] range = parts[1].split("TO");
+        String loopVar = parts[0].replace("FOR", "").trim();
         int start = resolveValue(range[0].trim());
         int end = resolveValue(range[1].trim());
 
-        // Execute the loop
         for (int i = start; i <= end; i++) {
-            // Find next line inside the loop to execute (handle ADD operation)
+            variables.put(loopVar, i); // Update loop variable in storage
             String nextLine = getNextLine();
             if (nextLine != null && nextLine.contains("ADD")) {
-                handleAdd(nextLine, i); // Perform addition inside the loop
+                handleAdd(nextLine, i);
             }
         }
     }
@@ -69,7 +69,6 @@ public class SumOfFirstNthNumber {
         String[] parts = line.split("TO");
         String varName = parts[1].trim(); // Extract the variable to which we add the value
 
-        // Retrieve current value of SUM and add the current loop value (i)
         int currentSum = variables.getOrDefault(varName, 0);
         currentSum += value;
         variables.put(varName, currentSum);
@@ -79,7 +78,12 @@ public class SumOfFirstNthNumber {
         // Extract the variable name from PRINT(SUM)
         String varName = line.substring(line.indexOf('(') + 1, line.indexOf(')')).trim();
         // Print the value of the variable
-        System.out.println(variables.get(varName));
+        Integer value = variables.get(varName);
+        if (value != null) {
+            System.out.println(value);
+        } else {
+            System.out.println("Variable " + varName + " is not defined.");
+        }
     }
 
     private int resolveValue(String expr) {
@@ -97,16 +101,16 @@ public class SumOfFirstNthNumber {
     public static void main(String[] args) {
         SumOfFirstNthNumber interpreter = new SumOfFirstNthNumber();
 
-        // GoLanf-like program to sum the first N numbers
+        // Go-like program to sum the first N numbers
         String program = """
-            SET N TO 5;
-            SET SUM TO 0;
+            N := 5;
+            SUM := 0;
             FOR I FROM 1 TO N;
                 ADD I TO SUM;
             END FOR;
             PRINT(SUM);
         """;
 
-        interpreter.eval(program); // Run the interpreter on the GoLanf-like program
+        interpreter.eval(program); // Run the interpreter on the Go-like program
     }
 }

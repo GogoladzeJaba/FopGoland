@@ -10,11 +10,11 @@ public class PalindromeNumberInterpreter {
             line = line.trim();
             if (line.isEmpty()) continue;
 
-            // Handle variable assignment (e.g., SET N TO 121)
-            if (line.startsWith("SET")) {
+            // Handle variable assignment (e.g., N := 121)
+            if (line.contains(":=")) {
                 handleAssignment(line);
             }
-            // Handle palindrome check operation (e.g., ISPALINDROME N INTO RESULT)
+            // Handle palindrome check operation (e.g., ISPALINDROME(N) INTO RESULT)
             else if (line.startsWith("ISPALINDROME")) {
                 handleIsPalindrome(line);
             }
@@ -26,28 +26,31 @@ public class PalindromeNumberInterpreter {
     }
 
     private void handleAssignment(String line) {
-        String[] parts = line.split("TO");
-        String varName = parts[0].replace("SET", "").trim(); // Extract the variable name
+        String[] parts = line.split(":=");
+        String varName = parts[0].trim(); // Extract the variable name
         String valueExpr = parts[1].trim(); // The value assigned to the variable
 
-        // If the value is a number (like SET N TO 121), parse it directly
+        // If the value is a number (like N := 121), parse it directly
         if (valueExpr.matches("\\d+")) {
             int value = Integer.parseInt(valueExpr);
             variables.put(varName, value);
         }
-        // If the value is a variable (like SET RESULT TO N), get its value
+        // If the value is a variable (like RESULT := N), get its value
         else if (variables.containsKey(valueExpr)) {
             int value = variables.get(valueExpr);
             variables.put(varName, value);
+        } else {
+            throw new IllegalArgumentException("Invalid value expression: " + valueExpr);
         }
     }
 
     private void handleIsPalindrome(String line) {
-        // Parse ISPALINDROME operation (e.g., ISPALINDROME N INTO RESULT)
+        // Parse ISPALINDROME(N) INTO RESULT
         String[] parts = line.split("INTO");
-        String varName = parts[0].replace("ISPALINDROME", "").trim();
+        String palindromeExpr = parts[0].replace("ISPALINDROME", "").trim();
         String resultVar = parts[1].trim();
 
+        String varName = palindromeExpr.substring(1, palindromeExpr.length() - 1).trim();
         int value = resolveValue(varName);
         boolean isPalindrome = checkPalindrome(value);
 
@@ -94,13 +97,13 @@ public class PalindromeNumberInterpreter {
     public static void main(String[] args) {
         PalindromeNumberInterpreter interpreter = new PalindromeNumberInterpreter();
 
-        // GoLand-like program to check if a number is a palindrome
+        // Go-like program to check if a number is a palindrome
         String program = """
-            SET N TO 121;
-            ISPALINDROME N INTO RESULT;
+            N := 121;
+            ISPALINDROME(N) INTO RESULT;
             PRINT(RESULT);
         """;
 
-        interpreter.eval(program); // Run the interpreter on the GoLand-like program
+        interpreter.eval(program); // Run the interpreter on the Go-like program
     }
 }

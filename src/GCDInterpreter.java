@@ -10,11 +10,11 @@ public class GCDInterpreter {
             line = line.trim();
             if (line.isEmpty()) continue;
 
-            // Handle variable assignment (e.g., SET A TO 5)
-            if (line.startsWith("SET")) {
+            // Handle variable assignment (e.g., A := 5)
+            if (line.contains(":=")) {
                 handleAssignment(line);
             }
-            // Handle GCD calculation (e.g., GCD A AND B INTO RESULT)
+            // Handle GCD calculation (e.g., GCD(A, B) INTO RESULT)
             else if (line.startsWith("GCD")) {
                 handleGCD(line);
             }
@@ -26,28 +26,33 @@ public class GCDInterpreter {
     }
 
     private void handleAssignment(String line) {
-        String[] parts = line.split("TO");
-        String varName = parts[0].replace("SET", "").trim(); // Extract the variable name
+        String[] parts = line.split(":=");
+        String varName = parts[0].trim(); // Extract the variable name
         String valueExpr = parts[1].trim(); // The value assigned to the variable
 
-        // If the value is a number (like SET A TO 5), parse it directly
+        // If the value is a number (like A := 5), parse it directly
         if (valueExpr.matches("\\d+")) {
             int value = Integer.parseInt(valueExpr);
             variables.put(varName, value);
         }
-        // If the value is a variable (like SET RESULT TO A), get its value
+        // If the value is a variable (like RESULT := A), get its value
         else if (variables.containsKey(valueExpr)) {
             int value = variables.get(valueExpr);
             variables.put(varName, value);
+        } else {
+            throw new IllegalArgumentException("Invalid value expression: " + valueExpr);
         }
     }
 
     private void handleGCD(String line) {
-        // Parse GCD operation (e.g., GCD A AND B INTO RESULT)
-        String[] parts = line.split("AND|INTO");
-        String var1 = parts[0].replace("GCD", "").trim();
-        String var2 = parts[1].trim();
-        String resultVar = parts[2].trim();
+        // Parse GCD operation (e.g., GCD(A, B) INTO RESULT)
+        String[] parts = line.split("INTO");
+        String gcdExpr = parts[0].replace("GCD", "").trim();
+        String resultVar = parts[1].trim();
+
+        String[] operands = gcdExpr.substring(1, gcdExpr.length() - 1).split(",");
+        String var1 = operands[0].trim();
+        String var2 = operands[1].trim();
 
         int a = resolveValue(var1);
         int b = resolveValue(var2);
@@ -89,14 +94,14 @@ public class GCDInterpreter {
     public static void main(String[] args) {
         GCDInterpreter interpreter = new GCDInterpreter();
 
-        // GoLanf-like program to calculate the GCD of A and B
+        // Go-like program to calculate the GCD of A and B
         String program = """
-            SET A TO 48;
-            SET B TO 18;
-            GCD A AND B INTO RESULT;
+            A := 48;
+            B := 18;
+            GCD(A, B) INTO RESULT;
             PRINT(RESULT);
         """;
 
-        interpreter.eval(program); // Run the interpreter on the GoLanf-like program
+        interpreter.eval(program); // Run the interpreter on the Go-like program
     }
 }

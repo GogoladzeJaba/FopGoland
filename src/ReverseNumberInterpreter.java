@@ -10,11 +10,11 @@ public class ReverseNumberInterpreter {
             line = line.trim();
             if (line.isEmpty()) continue;
 
-            // Handle variable assignment (e.g., SET N TO 123)
-            if (line.startsWith("SET")) {
+            // Handle variable assignment (e.g., N := 123)
+            if (line.contains(":=")) {
                 handleAssignment(line);
             }
-            // Handle reverse operation (e.g., REVERSE N INTO RESULT)
+            // Handle reverse operation (e.g., REVERSE(N) INTO RESULT)
             else if (line.startsWith("REVERSE")) {
                 handleReverse(line);
             }
@@ -26,28 +26,31 @@ public class ReverseNumberInterpreter {
     }
 
     private void handleAssignment(String line) {
-        String[] parts = line.split("TO");
-        String varName = parts[0].replace("SET", "").trim(); // Extract the variable name
+        String[] parts = line.split(":=");
+        String varName = parts[0].trim(); // Extract the variable name
         String valueExpr = parts[1].trim(); // The value assigned to the variable
 
-        // If the value is a number (like SET N TO 123), parse it directly
+        // If the value is a number (like N := 123), parse it directly
         if (valueExpr.matches("\\d+")) {
             int value = Integer.parseInt(valueExpr);
             variables.put(varName, value);
         }
-        // If the value is a variable (like SET RESULT TO N), get its value
+        // If the value is a variable (like RESULT := N), get its value
         else if (variables.containsKey(valueExpr)) {
             int value = variables.get(valueExpr);
             variables.put(varName, value);
+        } else {
+            throw new IllegalArgumentException("Invalid value expression: " + valueExpr);
         }
     }
 
     private void handleReverse(String line) {
-        // Parse REVERSE operation (e.g., REVERSE N INTO RESULT)
+        // Parse REVERSE operation (e.g., REVERSE(N) INTO RESULT)
         String[] parts = line.split("INTO");
-        String varName = parts[0].replace("REVERSE", "").trim();
+        String reverseExpr = parts[0].replace("REVERSE", "").trim();
         String resultVar = parts[1].trim();
 
+        String varName = reverseExpr.substring(1, reverseExpr.length() - 1); // Extract variable inside REVERSE()
         int value = resolveValue(varName);
         int reversed = 0;
 
@@ -88,13 +91,13 @@ public class ReverseNumberInterpreter {
     public static void main(String[] args) {
         ReverseNumberInterpreter interpreter = new ReverseNumberInterpreter();
 
-        // GoLand-like program to reverse a number
+        // Go-like program to reverse a number
         String program = """
-            SET N TO 12345;
-            REVERSE N INTO RESULT;
+            N := 12345;
+            REVERSE(N) INTO RESULT;
             PRINT(RESULT);
         """;
 
-        interpreter.eval(program); // Run the interpreter on the GoLand-like program
+        interpreter.eval(program); // Run the interpreter on the Go-like program
     }
 }

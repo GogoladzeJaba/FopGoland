@@ -27,6 +27,10 @@ public class FibonacciInterpreter {
 
     private void handleAssignment(String line) {
         String[] parts = line.split("TO");
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("Invalid assignment statement: " + line);
+        }
+
         String varName = parts[0].replace("SET", "").trim(); // Extract the variable name
         String valueExpr = parts[1].trim(); // The value assigned to the variable
 
@@ -39,12 +43,18 @@ public class FibonacciInterpreter {
         else if (variables.containsKey(valueExpr)) {
             int value = variables.get(valueExpr);
             variables.put(varName, value);
+        } else {
+            throw new IllegalArgumentException("Undefined variable: " + valueExpr);
         }
     }
 
     private void handleFibonacci(String line) {
         // Parse FIBONACCI operation (e.g., FIBONACCI N INTO RESULT)
         String[] parts = line.split("INTO");
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("Invalid Fibonacci statement: " + line);
+        }
+
         String varName = parts[0].replace("FIBONACCI", "").trim();
         String resultVar = parts[1].trim();
 
@@ -61,7 +71,13 @@ public class FibonacciInterpreter {
 
     private void handlePrint(String line) {
         // Extract the variable name from PRINT(RESULT)
-        String varName = line.substring(line.indexOf('(') + 1, line.indexOf(')')).trim();
+        int startIndex = line.indexOf('(') + 1;
+        int endIndex = line.indexOf(')');
+        if (startIndex <= 0 || endIndex <= startIndex) {
+            throw new IllegalArgumentException("Invalid print statement: " + line);
+        }
+
+        String varName = line.substring(startIndex, endIndex).trim();
         // Print the value of the variable
         Integer value = variables.get(varName);
         if (value != null) {
@@ -99,13 +115,13 @@ public class FibonacciInterpreter {
     public static void main(String[] args) {
         FibonacciInterpreter interpreter = new FibonacciInterpreter();
 
-        // GoLanf-like program to calculate the Nth Fibonacci number
+        // GoLang-like program to calculate the Nth Fibonacci number
         String program = """
-            SET N TO 3;
+            SET N TO 4;
             FIBONACCI N INTO RESULT;
             PRINT(RESULT);
         """;
 
-        interpreter.eval(program); // Run the interpreter on the GoLanf-like program
+        interpreter.eval(program); // Run the interpreter on the GoLang-like program
     }
 }
