@@ -3,6 +3,7 @@ import java.util.*;
 public class PrimeNumberInterpreter {
 
     private final Map<String, Integer> variables = new HashMap<>(); // Variable storage
+    private final Scanner scanner = new Scanner(System.in);  // To get user input
 
     public void eval(String code) {
         String[] lines = code.split(";"); // Split by statement terminator
@@ -92,13 +93,17 @@ public class PrimeNumberInterpreter {
     public static void main(String[] args) {
         PrimeNumberInterpreter interpreter = new PrimeNumberInterpreter();
 
-        // Go-like program to check if a number is prime
-        String program = """
-            N := 37;
+        // Ask for user input for N
+        System.out.print("Input value of N: ");
+        int n = interpreter.scanner.nextInt();  // Get value of N from user
+
+        // Simple program to check if the number is prime with the input value of N
+        String program = String.format("""
+            N := %d;
             ISPRIME(N) INTO RESULT;
             PRINT(RESULT);
-        """ ;
+        """, n);
 
-        interpreter.eval(program); // Run the interpreter on the Go-like program
+        interpreter.eval(program); // Run the interpreter on the program
     }
 }

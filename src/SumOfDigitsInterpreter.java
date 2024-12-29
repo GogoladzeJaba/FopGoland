@@ -3,6 +3,7 @@ import java.util.*;
 public class SumOfDigitsInterpreter {
 
     private final Map<String, Integer> variables = new HashMap<>(); // Variable storage
+    private final Scanner scanner = new Scanner(System.in);  // To get user input
 
     public void eval(String code) {
         String[] lines = code.split(";"); // Split by statement terminator
@@ -94,13 +95,17 @@ public class SumOfDigitsInterpreter {
     public static void main(String[] args) {
         SumOfDigitsInterpreter interpreter = new SumOfDigitsInterpreter();
 
-        // GoLand-like program to find the sum of digits in a number
-        String program = """
-            N := 12351;
+        // Ask for user input for N
+        System.out.print("Input value of N: ");
+        int n = interpreter.scanner.nextInt();  // Get value of N from user
+
+        // Simple program to calculate the sum of digits with the input value of N
+        String program = String.format("""
+            N := %d;
             SUMOFDIGITS(N) INTO RESULT;
             PRINT(RESULT);
-        """ ;
+        """, n);
 
-        interpreter.eval(program); // Run the interpreter on the GoLand-like program
+        interpreter.eval(program); // Run the interpreter on the program
     }
 }

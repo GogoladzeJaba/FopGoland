@@ -3,6 +3,7 @@ import java.util.*;
 public class GCDInterpreter {
 
     private final Map<String, Integer> variables = new HashMap<>(); // Variable storage
+    private final Scanner scanner = new Scanner(System.in); // Scanner to take input from the user
 
     public void eval(String code) {
         String[] lines = code.split(";"); // Split by statement terminator
@@ -28,19 +29,28 @@ public class GCDInterpreter {
     private void handleAssignment(String line) {
         String[] parts = line.split(":=");
         String varName = parts[0].trim(); // Extract the variable name
-        String valueExpr = parts[1].trim(); // The value assigned to the variable
 
-        // If the value is a number (like A := 5), parse it directly
-        if (valueExpr.matches("\\d+")) {
-            int value = Integer.parseInt(valueExpr);
-            variables.put(varName, value);
-        }
-        // If the value is a variable (like RESULT := A), get its value
-        else if (variables.containsKey(valueExpr)) {
-            int value = variables.get(valueExpr);
-            variables.put(varName, value);
+        // Check if there is an assignment value
+        if (parts.length > 1) {
+            String valueExpr = parts[1].trim(); // The value assigned to the variable
+
+            // If the value is a number (like A := 5), parse it directly
+            if (valueExpr.matches("\\d+")) {
+                int value = Integer.parseInt(valueExpr);
+                variables.put(varName, value);
+            }
+            // If the value is a variable (like RESULT := A), get its value
+            else if (variables.containsKey(valueExpr)) {
+                int value = variables.get(valueExpr);
+                variables.put(varName, value);
+            } else {
+                throw new IllegalArgumentException("Invalid value expression: " + valueExpr);
+            }
         } else {
-            throw new IllegalArgumentException("Invalid value expression: " + valueExpr);
+            // If no value is provided in the code, prompt the user for it
+            System.out.print("Please enter a value for " + varName + ": ");
+            int value = scanner.nextInt();
+            variables.put(varName, value);
         }
     }
 
@@ -96,8 +106,8 @@ public class GCDInterpreter {
 
         // Go-like program to calculate the GCD of A and B
         String program = """
-            A := 48;
-            B := 18;
+            A := ;
+            B := ;
             GCD(A, B) INTO RESULT;
             PRINT(RESULT);
         """ ;

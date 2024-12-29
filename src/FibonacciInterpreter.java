@@ -2,82 +2,79 @@ import java.util.*;
 
 public class FibonacciInterpreter {
 
+    Scanner scanner = new Scanner(System.in);
+
     private final Map<String, Integer> variables = new HashMap<>(); // Variable storage
 
     public void eval(String code) {
-        String[] lines = code.split(";"); // Split by statement terminator
-        for (String line : lines) {
-            line = line.trim();
-            if (line.isEmpty()) continue;
+        String[] lines = code.split(";"); // Split the input by statement terminator
+        int currentLineIndex = 0;
 
-            // Handle variable assignment (e.g., SET N TO 5)
-            if (line.startsWith("SET")) {
+        while (currentLineIndex < lines.length) {
+            String line = lines[currentLineIndex].trim();
+            if (line.isEmpty()) {
+                currentLineIndex++;
+                continue;
+            }
+
+            // Handle variable assignment (e.g., N := 5)
+            if (line.contains(":=")) {
                 handleAssignment(line);
             }
-            // Handle Fibonacci calculation (e.g., FIBONACCI N INTO RESULT)
-            else if (line.startsWith("FIBONACCI")) {
-                handleFibonacci(line);
+            // Handle FOR loops (e.g., FOR I FROM 1 TO N)
+            else if (line.startsWith("FOR")) {
+                currentLineIndex = handleForLoop(lines, currentLineIndex);
             }
-            // Handle print statements (e.g., PRINT(RESULT))
+            // Handle print statements (e.g., PRINT(FIBONACCI))
             else if (line.startsWith("PRINT")) {
                 handlePrint(line);
             }
+
+            currentLineIndex++;
         }
     }
 
     private void handleAssignment(String line) {
-        String[] parts = line.split("TO");
-        if (parts.length != 2) {
-            throw new IllegalArgumentException("Invalid assignment statement: " + line);
-        }
+        String[] parts = line.split(":=");
+        String varName = parts[0].trim(); // Extract variable name
+        String valueExpr = parts[1].trim(); // Extract assigned value
 
-        String varName = parts[0].replace("SET", "").trim(); // Extract the variable name
-        String valueExpr = parts[1].trim(); // The value assigned to the variable
-
-        // If the value is a number (like SET N TO 5), parse it directly
-        if (valueExpr.matches("\\d+")) {
-            int value = Integer.parseInt(valueExpr);
-            variables.put(varName, value);
-        }
-        // If the value is a variable (like SET RESULT TO N), get its value
-        else if (variables.containsKey(valueExpr)) {
-            int value = variables.get(valueExpr);
-            variables.put(varName, value);
-        } else {
-            throw new IllegalArgumentException("Undefined variable: " + valueExpr);
-        }
+        // Evaluate the expression and assign the result
+        int value = evaluateExpression(valueExpr);
+        variables.put(varName, value);
     }
 
-    private void handleFibonacci(String line) {
-        // Parse FIBONACCI operation (e.g., FIBONACCI N INTO RESULT)
-        String[] parts = line.split("INTO");
-        if (parts.length != 2) {
-            throw new IllegalArgumentException("Invalid Fibonacci statement: " + line);
+    private int handleForLoop(String[] lines, int startLineIndex) {
+        String loopHeader = lines[startLineIndex].trim();
+
+        // Parse the loop header: "FOR I FROM 1 TO N"
+        String[] parts = loopHeader.split("FROM");
+        String loopVar = parts[0].replace("FOR", "").trim();
+        String[] rangeParts = parts[1].split("TO");
+        int start = evaluateExpression(rangeParts[0].trim());
+        int end = evaluateExpression(rangeParts[1].trim());
+
+        // Locate the end of the loop
+        int endLoopIndex = startLineIndex + 1;
+        while (endLoopIndex < lines.length && !lines[endLoopIndex].trim().equals("END FOR")) {
+            endLoopIndex++;
         }
 
-        String varName = parts[0].replace("FIBONACCI", "").trim();
-        String resultVar = parts[1].trim();
-
-        int value = resolveValue(varName);
-
-        if (value <= 0) {
-            throw new IllegalArgumentException("Fibonacci sequence is not defined for values less than 1.");
+        // Execute the loop body
+        for (int i = start; i <= end; i++) {
+            variables.put(loopVar, i); // Update loop variable
+            for (int j = startLineIndex + 1; j < endLoopIndex; j++) {
+                eval(lines[j].trim() + ";"); // Re-evaluate each line in the loop body
+            }
         }
 
-        int fibValue = calculateFibonacci(value);
-
-        variables.put(resultVar, fibValue); // Store the Fibonacci result
+        return endLoopIndex; // Skip to the line after "END FOR"
     }
 
     private void handlePrint(String line) {
-        // Extract the variable name from PRINT(RESULT)
-        int startIndex = line.indexOf('(') + 1;
-        int endIndex = line.indexOf(')');
-        if (startIndex <= 0 || endIndex <= startIndex) {
-            throw new IllegalArgumentException("Invalid print statement: " + line);
-        }
+        // Extract variable name from PRINT(variable)
+        String varName = line.substring(line.indexOf('(') + 1, line.indexOf(')')).trim();
 
-        String varName = line.substring(startIndex, endIndex).trim();
         // Print the value of the variable
         Integer value = variables.get(varName);
         if (value != null) {
@@ -87,41 +84,43 @@ public class FibonacciInterpreter {
         }
     }
 
-    private int resolveValue(String expr) {
-        // If the expression is a number, parse it
-        if (expr.matches("\\d+")) {
+    private int evaluateExpression(String expr) {
+        // Handle basic expressions (e.g., A + B, constants, and variables)
+        if (expr.matches("\\d+")) { // If it's a number, return it
             return Integer.parseInt(expr);
-        }
-        // Otherwise, it must be a variable
-        else if (variables.containsKey(expr)) {
+        } else if (variables.containsKey(expr)) { // If it's a variable, get its value
             return variables.get(expr);
+        } else if (expr.contains("+")) { // Handle addition
+            String[] parts = expr.split("\\+");
+            return evaluateExpression(parts[0].trim()) + evaluateExpression(parts[1].trim());
+        } else if (expr.contains("-")) { // Handle subtraction
+            String[] parts = expr.split("-");
+            return evaluateExpression(parts[0].trim()) - evaluateExpression(parts[1].trim());
         }
         throw new IllegalArgumentException("Invalid value expression: " + expr);
-    }
-
-    private int calculateFibonacci(int n) {
-        if (n == 1) return 0; // 1st Fibonacci number
-        if (n == 2) return 1; // 2nd Fibonacci number
-
-        int a = 0, b = 1;
-        for (int i = 3; i <= n; i++) {
-            int temp = a + b;
-            a = b;
-            b = temp;
-        }
-        return b;
     }
 
     public static void main(String[] args) {
         FibonacciInterpreter interpreter = new FibonacciInterpreter();
 
-        // GoLang-like program to calculate the Nth Fibonacci number
-        String program = """
-            SET N TO 4;
-            FIBONACCI N INTO RESULT;
-            PRINT(RESULT);
-        """ ;
+        // Ask for user input for N
+        System.out.print("Input value of N: ");
+        int n = interpreter.scanner.nextInt();  // Get value of N from user
+        n--;  // Subtract 1 from the input value of N
 
-        interpreter.eval(program); // Run the interpreter on the GoLang-like program
+        // Simple program to calculate the N-th Fibonacci number with adjusted N
+        String program = String.format("""
+            N := %d;
+            A := 0;
+            B := 1;
+            FOR I FROM 1 TO N;
+                TEMP := A + B;
+                A := B;
+                B := TEMP;
+            END FOR;
+            PRINT(A);
+        """, n);
+
+        interpreter.eval(program); // Run the interpreter on the Fibonacci program
     }
 }

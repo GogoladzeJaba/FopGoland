@@ -3,6 +3,7 @@ import java.util.*;
 public class FactorialInterpreter {
 
     private final Map<String, Integer> variables = new HashMap<>(); // Variable storage
+    private final Scanner scanner = new Scanner(System.in); // To get user input
 
     public void eval(String code) {
         String[] lines = code.split(";"); // Split the input by statement terminator
@@ -33,13 +34,25 @@ public class FactorialInterpreter {
     }
 
     private void handleAssignment(String line) {
-        String[] parts = line.split(":=");
+        String[] parts = line.split(":="); // Split the assignment by ":="
+
+        if (parts.length != 2) {
+            throw new IllegalArgumentException("Invalid assignment syntax: " + line);
+        }
+
         String varName = parts[0].trim(); // Extract variable name
         String valueExpr = parts[1].trim(); // Extract assigned value
 
-        // Evaluate the expression and assign the result
-        int value = evaluateExpression(valueExpr);
-        variables.put(varName, value);
+        // If the variable is N and the value is empty, prompt the user for input
+        if (varName.equals("N") && valueExpr.isEmpty()) {
+            System.out.print("Please enter a value for N: ");
+            int value = scanner.nextInt();
+            variables.put(varName, value);
+        } else {
+            // Otherwise, evaluate the expression and assign the result
+            int value = evaluateExpression(valueExpr);
+            variables.put(varName, value);
+        }
     }
 
     private int handleForLoop(String[] lines, int startLineIndex) {
@@ -107,16 +120,20 @@ public class FactorialInterpreter {
     public static void main(String[] args) {
         FactorialInterpreter interpreter = new FactorialInterpreter();
 
-        // Go-like program to calculate the factorial of N
-        String program = """
-            N := 6;
+        // Ask for user input for N
+        System.out.print("Input value of N: ");
+        int n = interpreter.scanner.nextInt();  // Get value of N from user
+
+        // Simple program to calculate the factorial of N
+        String program = String.format("""
+            N := %d;
             FACTORIAL := 1;
             FOR I FROM 1 TO N;
                 FACTORIAL := FACTORIAL * I;
             END FOR;
             PRINT(FACTORIAL);
-        """ ;
+        """, n);
 
-        interpreter.eval(program); // Run the interpreter on the Go-like program
+        interpreter.eval(program); // Run the interpreter on the program
     }
 }

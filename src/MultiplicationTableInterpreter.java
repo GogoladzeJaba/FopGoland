@@ -3,6 +3,7 @@ import java.util.*;
 public class MultiplicationTableInterpreter {
 
     private final Map<String, Integer> variables = new HashMap<>(); // Variable storage
+    private final Scanner scanner = new Scanner(System.in);  // To get user input
 
     public void eval(String code) {
         String[] lines = code.split(";"); // Split by statement terminator
@@ -80,12 +81,16 @@ public class MultiplicationTableInterpreter {
     public static void main(String[] args) {
         MultiplicationTableInterpreter interpreter = new MultiplicationTableInterpreter();
 
-        // Go-like program to generate a multiplication table
-        String program = """
-            N :=3;
-            MULTIPLICATIONTABLE N;
-        """ ;
+        // Ask for user input for N
+        System.out.print("Input value of N: ");
+        int n = interpreter.scanner.nextInt();  // Get value of N from user
 
-        interpreter.eval(program); // Run the interpreter on the Go-like program
+        // Simple program to generate a multiplication table with the input value of N
+        String program = String.format("""
+            N := %d;
+            MULTIPLICATIONTABLE N;
+        """, n);
+
+        interpreter.eval(program); // Run the interpreter on the program
     }
 }

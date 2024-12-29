@@ -3,6 +3,7 @@ import java.util.*;
 public class SumOfFirstNthNumber {
 
     private final Map<String, Integer> variables = new HashMap<>(); // Variable storage
+    private final Scanner scanner = new Scanner(System.in); // To get user input
 
     public void eval(String code) {
         String[] lines = code.split(";"); // Split by statement terminator
@@ -101,16 +102,20 @@ public class SumOfFirstNthNumber {
     public static void main(String[] args) {
         SumOfFirstNthNumber interpreter = new SumOfFirstNthNumber();
 
-        // Go-like program to sum the first N numbers
-        String program = """
-            N := 5;
+        // Ask for user input for N
+        System.out.print("Input value of N: ");
+        int n = interpreter.scanner.nextInt();  // Get value of N from user
+
+        // Simple program to sum the first N numbers
+        String program = String.format("""
+            N := %d;
             SUM := 0;
             FOR I FROM 1 TO N;
                 ADD I TO SUM;
             END FOR;
             PRINT(SUM);
-        """ ;
+        """, n);
 
-        interpreter.eval(program); // Run the interpreter on the Go-like program
+        interpreter.eval(program); // Run the interpreter on the program
     }
 }

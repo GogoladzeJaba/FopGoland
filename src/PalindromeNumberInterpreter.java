@@ -3,6 +3,7 @@ import java.util.*;
 public class PalindromeNumberInterpreter {
 
     private final Map<String, Integer> variables = new HashMap<>(); // Variable storage
+    private final Scanner scanner = new Scanner(System.in);  // To get user input
 
     public void eval(String code) {
         String[] lines = code.split(";"); // Split by statement terminator
@@ -97,13 +98,17 @@ public class PalindromeNumberInterpreter {
     public static void main(String[] args) {
         PalindromeNumberInterpreter interpreter = new PalindromeNumberInterpreter();
 
-        // Go-like program to check if a number is a palindrome
-        String program = """
-            N := 121;
+        // Ask for user input for N
+        System.out.print("Input value of N: ");
+        int n = interpreter.scanner.nextInt();  // Get value of N from user
+
+        // Simple program to check if the number is a palindrome with the input value of N
+        String program = String.format("""
+            N := %d;
             ISPALINDROME(N) INTO RESULT;
             PRINT(RESULT);
-        """ ;
+        """, n);
 
-        interpreter.eval(program); // Run the interpreter on the Go-like program
+        interpreter.eval(program); // Run the interpreter on the program
     }
 }
