@@ -88,13 +88,13 @@ public class ReverseNumberInterpreter {
     public static void main(String[] args) {
         ReverseNumberInterpreter interpreter = new ReverseNumberInterpreter();
 
-        // GoLanf-like program to reverse a number
+        // GoLand-like program to reverse a number
         String program = """
             SET N TO 12345;
             REVERSE N INTO RESULT;
             PRINT(RESULT);
         """;
 
-        interpreter.eval(program); // Run the interpreter on the GoLanf-like program
+        interpreter.eval(program); // Run the interpreter on the GoLand-like program
     }
 }

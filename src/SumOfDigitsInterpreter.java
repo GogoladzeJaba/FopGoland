@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class LargestDigitInterpreter {
+public class SumOfDigitsInterpreter {
 
     private final Map<String, Integer> variables = new HashMap<>(); // Variable storage
 
@@ -14,9 +14,9 @@ public class LargestDigitInterpreter {
             if (line.startsWith("SET")) {
                 handleAssignment(line);
             }
-            // Handle largest digit operation (e.g., LARGESTDIGIT N INTO RESULT)
-            else if (line.startsWith("LARGESTDIGIT")) {
-                handleLargestDigit(line);
+            // Handle sum of digits operation (e.g., SUMOFDIGITS N INTO RESULT)
+            else if (line.startsWith("SUMOFDIGITS")) {
+                handleSumOfDigits(line);
             }
             // Handle print statements (e.g., PRINT(RESULT))
             else if (line.startsWith("PRINT")) {
@@ -42,16 +42,16 @@ public class LargestDigitInterpreter {
         }
     }
 
-    private void handleLargestDigit(String line) {
-        // Parse LARGESTDIGIT operation (e.g., LARGESTDIGIT N INTO RESULT)
+    private void handleSumOfDigits(String line) {
+        // Parse SUMOFDIGITS operation (e.g., SUMOFDIGITS N INTO RESULT)
         String[] parts = line.split("INTO");
-        String varName = parts[0].replace("LARGESTDIGIT", "").trim();
+        String varName = parts[0].replace("SUMOFDIGITS", "").trim();
         String resultVar = parts[1].trim();
 
         int value = resolveValue(varName);
-        int largestDigit = findLargestDigit(value);
+        int sumOfDigits = findSumOfDigits(value);
 
-        variables.put(resultVar, largestDigit); // Store the largest digit
+        variables.put(resultVar, sumOfDigits); // Store the sum of digits
     }
 
     private void handlePrint(String line) {
@@ -78,27 +78,24 @@ public class LargestDigitInterpreter {
         throw new IllegalArgumentException("Invalid value expression: " + expr);
     }
 
-    private int findLargestDigit(int n) {
-        int largest = 0;
+    private int findSumOfDigits(int n) {
+        int sum = 0;
 
         while (n != 0) {
-            int digit = n % 10;
-            if (digit > largest) {
-                largest = digit;
-            }
+            sum += n % 10;
             n /= 10;
         }
 
-        return largest;
+        return sum;
     }
 
     public static void main(String[] args) {
-        LargestDigitInterpreter interpreter = new LargestDigitInterpreter();
+        SumOfDigitsInterpreter interpreter = new SumOfDigitsInterpreter();
 
-        // GoLand-like program to find the largest digit in a number
+        // GoLand-like program to find the sum of digits in a number
         String program = """
-            SET N TO 412950399;
-            LARGESTDIGIT N INTO RESULT;
+            SET N TO 12351;
+            SUMOFDIGITS N INTO RESULT;
             PRINT(RESULT);
         """;
 

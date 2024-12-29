@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class LargestDigitInterpreter {
+public class MultiplicationTableInterpreter {
 
     private final Map<String, Integer> variables = new HashMap<>(); // Variable storage
 
@@ -10,13 +10,13 @@ public class LargestDigitInterpreter {
             line = line.trim();
             if (line.isEmpty()) continue;
 
-            // Handle variable assignment (e.g., SET N TO 121)
+            // Handle variable assignment (e.g., SET N TO 5)
             if (line.startsWith("SET")) {
                 handleAssignment(line);
             }
-            // Handle largest digit operation (e.g., LARGESTDIGIT N INTO RESULT)
-            else if (line.startsWith("LARGESTDIGIT")) {
-                handleLargestDigit(line);
+            // Handle multiplication table operation (e.g., MULTIPLICATIONTABLE N)
+            else if (line.startsWith("MULTIPLICATIONTABLE")) {
+                handleMultiplicationTable(line);
             }
             // Handle print statements (e.g., PRINT(RESULT))
             else if (line.startsWith("PRINT")) {
@@ -30,7 +30,7 @@ public class LargestDigitInterpreter {
         String varName = parts[0].replace("SET", "").trim(); // Extract the variable name
         String valueExpr = parts[1].trim(); // The value assigned to the variable
 
-        // If the value is a number (like SET N TO 121), parse it directly
+        // If the value is a number (like SET N TO 5), parse it directly
         if (valueExpr.matches("\\d+")) {
             int value = Integer.parseInt(valueExpr);
             variables.put(varName, value);
@@ -42,16 +42,15 @@ public class LargestDigitInterpreter {
         }
     }
 
-    private void handleLargestDigit(String line) {
-        // Parse LARGESTDIGIT operation (e.g., LARGESTDIGIT N INTO RESULT)
-        String[] parts = line.split("INTO");
-        String varName = parts[0].replace("LARGESTDIGIT", "").trim();
-        String resultVar = parts[1].trim();
-
+    private void handleMultiplicationTable(String line) {
+        // Parse MULTIPLICATIONTABLE operation (e.g., MULTIPLICATIONTABLE N)
+        String varName = line.replace("MULTIPLICATIONTABLE", "").trim();
         int value = resolveValue(varName);
-        int largestDigit = findLargestDigit(value);
 
-        variables.put(resultVar, largestDigit); // Store the largest digit
+        System.out.println("Multiplication Table for " + value + ":");
+        for (int i = 1; i <= 10; i++) {
+            System.out.println(value + " x " + i + " = " + (value * i));
+        }
     }
 
     private void handlePrint(String line) {
@@ -78,30 +77,15 @@ public class LargestDigitInterpreter {
         throw new IllegalArgumentException("Invalid value expression: " + expr);
     }
 
-    private int findLargestDigit(int n) {
-        int largest = 0;
-
-        while (n != 0) {
-            int digit = n % 10;
-            if (digit > largest) {
-                largest = digit;
-            }
-            n /= 10;
-        }
-
-        return largest;
-    }
-
     public static void main(String[] args) {
-        LargestDigitInterpreter interpreter = new LargestDigitInterpreter();
+        MultiplicationTableInterpreter interpreter = new MultiplicationTableInterpreter();
 
-        // GoLand-like program to find the largest digit in a number
+        // GoLanf-like program to generate a multiplication table
         String program = """
-            SET N TO 412950399;
-            LARGESTDIGIT N INTO RESULT;
-            PRINT(RESULT);
+            SET N TO 8;
+            MULTIPLICATIONTABLE N;
         """;
 
-        interpreter.eval(program); // Run the interpreter on the GoLand-like program
+        interpreter.eval(program); // Run the interpreter on the GoLanf-like program
     }
 }

@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class LargestDigitInterpreter {
+public class FibonacciInterpreter {
 
     private final Map<String, Integer> variables = new HashMap<>(); // Variable storage
 
@@ -10,13 +10,13 @@ public class LargestDigitInterpreter {
             line = line.trim();
             if (line.isEmpty()) continue;
 
-            // Handle variable assignment (e.g., SET N TO 121)
+            // Handle variable assignment (e.g., SET N TO 5)
             if (line.startsWith("SET")) {
                 handleAssignment(line);
             }
-            // Handle largest digit operation (e.g., LARGESTDIGIT N INTO RESULT)
-            else if (line.startsWith("LARGESTDIGIT")) {
-                handleLargestDigit(line);
+            // Handle Fibonacci calculation (e.g., FIBONACCI N INTO RESULT)
+            else if (line.startsWith("FIBONACCI")) {
+                handleFibonacci(line);
             }
             // Handle print statements (e.g., PRINT(RESULT))
             else if (line.startsWith("PRINT")) {
@@ -30,7 +30,7 @@ public class LargestDigitInterpreter {
         String varName = parts[0].replace("SET", "").trim(); // Extract the variable name
         String valueExpr = parts[1].trim(); // The value assigned to the variable
 
-        // If the value is a number (like SET N TO 121), parse it directly
+        // If the value is a number (like SET N TO 5), parse it directly
         if (valueExpr.matches("\\d+")) {
             int value = Integer.parseInt(valueExpr);
             variables.put(varName, value);
@@ -42,16 +42,21 @@ public class LargestDigitInterpreter {
         }
     }
 
-    private void handleLargestDigit(String line) {
-        // Parse LARGESTDIGIT operation (e.g., LARGESTDIGIT N INTO RESULT)
+    private void handleFibonacci(String line) {
+        // Parse FIBONACCI operation (e.g., FIBONACCI N INTO RESULT)
         String[] parts = line.split("INTO");
-        String varName = parts[0].replace("LARGESTDIGIT", "").trim();
+        String varName = parts[0].replace("FIBONACCI", "").trim();
         String resultVar = parts[1].trim();
 
         int value = resolveValue(varName);
-        int largestDigit = findLargestDigit(value);
 
-        variables.put(resultVar, largestDigit); // Store the largest digit
+        if (value <= 0) {
+            throw new IllegalArgumentException("Fibonacci sequence is not defined for values less than 1.");
+        }
+
+        int fibValue = calculateFibonacci(value);
+
+        variables.put(resultVar, fibValue); // Store the Fibonacci result
     }
 
     private void handlePrint(String line) {
@@ -78,30 +83,29 @@ public class LargestDigitInterpreter {
         throw new IllegalArgumentException("Invalid value expression: " + expr);
     }
 
-    private int findLargestDigit(int n) {
-        int largest = 0;
+    private int calculateFibonacci(int n) {
+        if (n == 1) return 0; // 1st Fibonacci number
+        if (n == 2) return 1; // 2nd Fibonacci number
 
-        while (n != 0) {
-            int digit = n % 10;
-            if (digit > largest) {
-                largest = digit;
-            }
-            n /= 10;
+        int a = 0, b = 1;
+        for (int i = 3; i <= n; i++) {
+            int temp = a + b;
+            a = b;
+            b = temp;
         }
-
-        return largest;
+        return b;
     }
 
     public static void main(String[] args) {
-        LargestDigitInterpreter interpreter = new LargestDigitInterpreter();
+        FibonacciInterpreter interpreter = new FibonacciInterpreter();
 
-        // GoLand-like program to find the largest digit in a number
+        // GoLanf-like program to calculate the Nth Fibonacci number
         String program = """
-            SET N TO 412950399;
-            LARGESTDIGIT N INTO RESULT;
+            SET N TO 3;
+            FIBONACCI N INTO RESULT;
             PRINT(RESULT);
         """;
 
-        interpreter.eval(program); // Run the interpreter on the GoLand-like program
+        interpreter.eval(program); // Run the interpreter on the GoLanf-like program
     }
 }

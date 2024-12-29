@@ -89,13 +89,13 @@ public class PrimeNumberInterpreter {
     public static void main(String[] args) {
         PrimeNumberInterpreter interpreter = new PrimeNumberInterpreter();
 
-        // GoLanf-like program to check if a number is prime
+        // GoLand-like program to check if a number is prime
         String program = """
             SET N TO 37;
             ISPRIME N INTO RESULT;
             PRINT(RESULT);
         """;
 
-        interpreter.eval(program); // Run the interpreter on the GoLanf-like program
+        interpreter.eval(program); // Run the interpreter on the GoLand-like program
     }
 }
