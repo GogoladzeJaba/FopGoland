@@ -120,7 +120,7 @@ public class FibonacciInterpreter {
             SET N TO 4;
             FIBONACCI N INTO RESULT;
             PRINT(RESULT);
-        """;
+        """ ;
 
         interpreter.eval(program); // Run the interpreter on the GoLang-like program
     }

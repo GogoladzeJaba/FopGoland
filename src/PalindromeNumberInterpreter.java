@@ -102,7 +102,7 @@ public class PalindromeNumberInterpreter {
             N := 121;
             ISPALINDROME(N) INTO RESULT;
             PRINT(RESULT);
-        """;
+        """ ;
 
         interpreter.eval(program); // Run the interpreter on the Go-like program
     }

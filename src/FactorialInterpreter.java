@@ -115,7 +115,7 @@ public class FactorialInterpreter {
                 FACTORIAL := FACTORIAL * I;
             END FOR;
             PRINT(FACTORIAL);
-        """;
+        """ ;
 
         interpreter.eval(program); // Run the interpreter on the Go-like program
     }

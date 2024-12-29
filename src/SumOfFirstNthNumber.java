@@ -109,7 +109,7 @@ public class SumOfFirstNthNumber {
                 ADD I TO SUM;
             END FOR;
             PRINT(SUM);
-        """;
+        """ ;
 
         interpreter.eval(program); // Run the interpreter on the Go-like program
     }

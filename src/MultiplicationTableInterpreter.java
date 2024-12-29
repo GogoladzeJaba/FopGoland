@@ -84,7 +84,7 @@ public class MultiplicationTableInterpreter {
         String program = """
             N :=3;
             MULTIPLICATIONTABLE N;
-        """;
+        """ ;
 
         interpreter.eval(program); // Run the interpreter on the Go-like program
     }

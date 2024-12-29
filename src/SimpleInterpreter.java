@@ -39,7 +39,7 @@ public class SimpleInterpreter {
                 default -> System.out.println("Invalid choice. Please try again.");
             }
 
-            System.out.println();
+            System.out.println() ;
         }
     }
 }

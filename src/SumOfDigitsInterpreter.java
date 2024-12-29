@@ -99,7 +99,7 @@ public class SumOfDigitsInterpreter {
             N := 12351;
             SUMOFDIGITS(N) INTO RESULT;
             PRINT(RESULT);
-        """;
+        """ ;
 
         interpreter.eval(program); // Run the interpreter on the GoLand-like program
     }

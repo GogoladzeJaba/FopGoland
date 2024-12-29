@@ -96,7 +96,7 @@ public class ReverseNumberInterpreter {
             N := 12345;
             REVERSE(N) INTO RESULT;
             PRINT(RESULT);
-        """;
+        """ ;
 
         interpreter.eval(program); // Run the interpreter on the Go-like program
     }

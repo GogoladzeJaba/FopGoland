@@ -100,7 +100,7 @@ public class GCDInterpreter {
             B := 18;
             GCD(A, B) INTO RESULT;
             PRINT(RESULT);
-        """;
+        """ ;
 
         interpreter.eval(program); // Run the interpreter on the Go-like program
     }
