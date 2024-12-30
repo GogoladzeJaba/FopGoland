@@ -103,10 +103,17 @@ public class FibonacciInterpreter {
     public static void main(String[] args) {
         FibonacciInterpreter interpreter = new FibonacciInterpreter();
 
-        // Ask for user input for N
-        System.out.print("Input value of N: ");
-        int n = interpreter.scanner.nextInt();  // Get value of N from user
-        n--;  // Subtract 1 from the input value of N
+        int n;
+        do {
+            System.out.print("Input value of N (natural number): ");
+            n = interpreter.scanner.nextInt(); // Get value of N from user
+
+            if (n <= 0) {
+                System.out.println("Invalid input! Please enter a natural number (1 or greater).");
+            }
+        } while (n <= 0); // Keep asking until a valid natural number is entered
+
+        n--; // Subtract 1 from the input value of N for zero-based index calculations
 
         // Simple program to calculate the N-th Fibonacci number with adjusted N
         String program = String.format("""
