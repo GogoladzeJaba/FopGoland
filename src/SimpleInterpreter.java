@@ -15,7 +15,7 @@ public class SimpleInterpreter {
             System.out.println("4. [Reverse a Number]           5. [Prime Checker]           6. [Palindrome Checker]");
             System.out.println("7. [Largest Digit in a Number]  8. [Sum of Digits]           9. [Multiplication Table]");
             System.out.println("\n                           10. [Nth Fibonacci Number]\n");
-            System.out.println("0. Exit");
+            System.out.println("0. [Exit]");
 
             System.out.print("Enter your choice: ");
             int choice = scanner.nextInt();
