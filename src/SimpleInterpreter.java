@@ -1,24 +1,20 @@
 import java.util.Scanner;
 
-import static java.lang.Thread.sleep;
-
 public class SimpleInterpreter {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
             System.out.println("\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/\\/");
-            System.out.println("Welcome to the Simple Interpreter! Choose an algorithm:");
-            System.out.println("1. Sum of First N Numbers");
-            System.out.println("2. Factorial of N");
-            System.out.println("3. GCD of Two Numbers");
-            System.out.println("4. Reverse a Number");
-            System.out.println("5. Prime Checker");
-            System.out.println("6. Palindrome Checker");
-            System.out.println("7. Largest Digit in a Number");
-            System.out.println("8. Sum of Digits");
-            System.out.println("9. Multiplication Table");
-            System.out.println("10. Nth Fibonacci Number");
+            System.out.println("__________________________________________________________");
+            System.out.println();
+            System.out.println("Welcome to the Simple Interpreter! Choose an algorithm:\n");
+
+            // Display the menu in a 3x3 grid format
+            System.out.println("1. [Sum of First N Numbers]     2. [Factorial of N]          3. [GCD of Two Numbers]");
+            System.out.println("4. [Reverse a Number]           5. [Prime Checker]           6. [Palindrome Checker]");
+            System.out.println("7. [Largest Digit in a Number]  8. [Sum of Digits]           9. [Multiplication Table]");
+            System.out.println("\n                           10. [Nth Fibonacci Number]\n");
             System.out.println("0. Exit");
 
             System.out.print("Enter your choice: ");
@@ -41,7 +37,6 @@ public class SimpleInterpreter {
                 }
                 default -> System.out.println("Invalid choice. Please try again.");
             }
-
         }
     }
 }
